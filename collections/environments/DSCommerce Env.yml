@@ -1,0 +1,18 @@
+name: DSCommerce Env
+variables:
+  - name: host
+    value: http://localhost:8080
+  - name: user-username
+    value: johndoe@gmail.com
+  - name: user-password
+    value: senha123
+  - name: admin-username
+    value: admin@dscommerce.com
+  - name: admin-password
+    value: admin123
+  - name: client-id
+    value: myclientid
+  - name: client-secret
+    value: myclientsecret
+  - name: token
+    value:

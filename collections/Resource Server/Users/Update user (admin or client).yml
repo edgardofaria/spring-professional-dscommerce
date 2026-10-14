@@ -1,0 +1,26 @@
+info:
+  name: Update user (admin or client)
+  type: http
+  seq: 6
+
+http:
+  method: PUT
+  url: "{{host}}/users/3"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Bob Updated",
+        "phone": "12345678901",
+        "birthDate": "1990-01-15",
+        "password": "123456"
+      }
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

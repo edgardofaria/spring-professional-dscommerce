@@ -1,0 +1,31 @@
+info:
+  name: New product (admin only)
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{host}}/products"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Tablet",
+        "description": "Descrição do tablet com pelo menos 10 caracteres.",
+        "price": 1299.99,
+        "imgUrl": "https://i.imgur.com/pfIxvBk.jpeg",
+        "categories": [
+          {
+            "id": 1
+          }
+        ]
+      }
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,35 @@
+info:
+  name: Login User
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{host}}/oauth2/token"
+  body:
+    type: form-urlencoded
+    data:
+      - name: username
+        value: "{{user-username}}"
+      - name: password
+        value: "{{user-password}}"
+      - name: grant_type
+        value: password
+  auth:
+    type: basic
+    username: "{{client-id}}"
+    password: "{{client-secret}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        if (res.status == 200) {
+          bru.setEnvVar('token', res.body.access_token);
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

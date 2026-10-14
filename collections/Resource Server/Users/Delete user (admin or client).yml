@@ -1,0 +1,17 @@
+info:
+  name: Delete user (admin or client)
+  type: http
+  seq: 7
+
+http:
+  method: DELETE
+  url: "{{host}}/users/3"
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

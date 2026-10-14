@@ -1,0 +1,34 @@
+info:
+  name: Update product (admin only)
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{host}}/products/1"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Tablet Pro",
+        "description": "Descrição atualizada do tablet com pelo menos 10 caracteres.",
+        "price": 1499.99,
+        "imgUrl": "https://i.imgur.com/pfIxvBk.jpeg",
+        "categories": [
+          {
+            "id": 1
+          },
+          {
+            "id": 3
+          }
+        ]
+      }
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
