@@ -37,14 +37,13 @@ public class ResourceServerConfig {
     }
 
     @Bean
-    @Profile("test")
-    @Order(1)
-    public SecurityFilterChain h2SecurityFilterChain(HttpSecurity http) throws Exception {
-
-        http.securityMatcher(PathRequest.toH2Console()).csrf(csrf -> csrf.disable())
-                .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()));
-        return http.build();
-    }
+	@Profile("test")
+	@Order(1)
+	SecurityFilterChain h2SecurityFilterChain(HttpSecurity http) throws Exception {
+		http.securityMatcher(PathRequest.toH2Console()).csrf(csrf -> csrf.disable());
+		http.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()));
+		return http.build();
+	}
 
     @Bean
     @Order(3)
