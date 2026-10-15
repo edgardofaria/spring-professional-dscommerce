@@ -2,26 +2,31 @@ package com.spring_class.dscommerce.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.spring_class.dscommerce.dto.product.ProductDTO;
 import com.spring_class.dscommerce.dto.product.ProductMinDTO;
 import com.spring_class.dscommerce.service.ProductService;
+import com.spring_class.dscommerce.service.exceptions.ProductNotFoundException;
 
-@WebMvcTest(ProductController.class)
+@WebMvcTest(value = ProductController.class, excludeAutoConfiguration = { SecurityAutoConfiguration.class })
 public class ProductControllerTests {
 
     @Autowired
@@ -30,7 +35,7 @@ public class ProductControllerTests {
     @MockitoBean
     private ProductService service;
 
-    private ProductMinDTO productMinDTO;
+    private ProductDTO productDTO;
 
     private PageImpl<ProductMinDTO> page;
 
@@ -40,9 +45,10 @@ public class ProductControllerTests {
     @BeforeEach
     @SuppressWarnings("unused")
     void setUp() {
-        productMinDTO = new ProductMinDTO(EXISTING_ID, "Laptop", new BigDecimal("1999.90"),
-                "https://example.com/laptop.jpg");
-        page = new PageImpl<>(List.of(productMinDTO));
+        productDTO = new ProductDTO(EXISTING_ID, "Laptop", "", new BigDecimal("1999.9"),
+                "https://example.com/laptop.jpg", Set.of());
+        page = new PageImpl<>(List
+                .of(new ProductMinDTO(productDTO.id(), productDTO.name(), productDTO.price(), productDTO.imgUrl())));
     }
 
     @Test
@@ -56,20 +62,22 @@ public class ProductControllerTests {
 
     @Test
     void findByIdShouldReturnProductWhenIdExists() throws Exception {
-        doReturn(productMinDTO).when(service).findById(EXISTING_ID);
+        doReturn(productDTO).when(service).findById(EXISTING_ID);
 
         mockMvc.perform(get("/products/{id}", EXISTING_ID)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(EXISTING_ID))
-                .andExpect(jsonPath("$.name").value(productMinDTO.name()))
-                .andExpect(jsonPath("$.price").value(productMinDTO.price()))
-                .andExpect(jsonPath("$.imgUrl").value(productMinDTO.imgUrl()));
+                .andExpect(jsonPath("$.name").value(productDTO.name()))
+                .andExpect(jsonPath("$.description").value(productDTO.description()))
+                .andExpect(jsonPath("$.price").value(productDTO.price()))
+                .andExpect(jsonPath("$.imgUrl").value(productDTO.imgUrl()));
     }
 
     @Test
     void findByIdShouldReturnProductNotFoundWhenIdDoesNotExist() throws Exception {
-        doReturn(null).when(service).findById(NON_EXISTING_ID);
+        doThrow(new ProductNotFoundException("Product not found"))
+                .when(service).findById(NON_EXISTING_ID);
 
         mockMvc.perform(get("/products/{id}", NON_EXISTING_ID)
                 .accept(MediaType.APPLICATION_JSON))
