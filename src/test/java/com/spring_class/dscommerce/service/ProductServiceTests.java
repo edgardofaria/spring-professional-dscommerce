@@ -21,6 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -83,7 +84,7 @@ class ProductServiceTests {
     }
 
     @Test
-    void findAllShouldReturnPageOfProductsWithoutProductName() {
+    void findAllShouldReturnPageOfProductsWhenNameIsNull() {
         ProductMinDTO productMinDTO = new ProductMinDTO(product.getId(), product.getName(), product.getPrice(),
                 product.getImgUrl());
 
@@ -92,10 +93,11 @@ class ProductServiceTests {
 
         doReturn(productMinDTO).when(mapper).toMinDTO(product);
 
-        Page<ProductMinDTO> page = service.findAll("", pageable);
+        Page<ProductMinDTO> page = service.findAll(null, pageable);
 
         assertEquals(1, page.getTotalElements());
         assertEquals(productMinDTO, page.getContent().get(0));
+        verify(repository).findByNameContainingIgnoreCase("", pageable);
     }
 
     @Test
@@ -170,11 +172,15 @@ class ProductServiceTests {
     @Test
     void deleteShouldThrowDataIntegrityViolationExceptionWhenIdIsDependent() {
         doReturn(Optional.of(product)).when(repository).findById(DEPENDENT_ID);
-        doThrow(DataBaseIntegrityViolationException.class).when(repository).delete(product);
+        doThrow(new DataIntegrityViolationException("Constraint violation")).when(repository).delete(product);
 
-        assertNotNull(assertThrows(DataBaseIntegrityViolationException.class, () -> service.delete(DEPENDENT_ID)));
+        DataBaseIntegrityViolationException exception = assertThrows(DataBaseIntegrityViolationException.class,
+                () -> service.delete(DEPENDENT_ID));
+
+        assertEquals("Referential integrity violation", exception.getMessage());
         verify(repository).findById(DEPENDENT_ID);
         verify(repository).delete(product);
+        verify(repository, never()).flush();
     }
 
 }
